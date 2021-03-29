@@ -9,7 +9,7 @@ import Crypto.Random as Random
 from Crypto.Hash import SHA256
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import buildParams, decideRatio, MESSAGE_TYPE
+from util import buildParams, decideRatio, MESSAGE_TYPE, pprintResult
 
 parser = argparse.ArgumentParser(description='Execute output-secure LDP protocols in Server role.')
 parser.add_argument('--mech', type=str, help="used mechanism [krr, oue, olh] (default: krr)", default="krr")
@@ -28,9 +28,10 @@ class Prover:
         else:
             assert False, "out of categories"
         self.categories, self.d, self.l, self.n, self.z = categories, d, l, n, z
+        self.clock = time.time()
+        self.result = {}
         
     def setup(self):
-        print('Prover setup')
         t = self.data
         print("secret input: ", t)
         mu_array = []
@@ -45,7 +46,6 @@ class Prover:
         self.pub_key = pub_key
     
     def step1(self, msg):
-        print('step1')
         g_a, g_b, g_ab = msg['g_a'], msg['g_b'], msg['g_ab']
         w_array, y_array = self.encryption(g_a, g_b, g_ab)
         b_array = self.P1_a()
@@ -59,7 +59,6 @@ class Prover:
         return msg
 
     def step3(self, msg):
-        print('step3')
         ak_p1_x_array = msg['ak_p1_x_array']
         c_array, s_array = self.P1_c(ak_p1_x_array)
         ak_p2_x_lin = msg['ak_p2_x_lin']
@@ -185,23 +184,32 @@ class Prover:
 
     def messageHandler(self, conn):
         is_end = False
-        msg = simpleRecv(conn)
+        msg, size = simpleRecv(conn)
         if msg['type'] == MESSAGE_TYPE.STEP1:
+            start = time.time()
             self.setPubKey(msg['pub_key'])
             msg_to_be_send = self.step1(msg)
+            self.loggingResult('step1 time [s]', time.time() - start)
+            self.loggingResult('MESSAGE_TYPE.STEP1 size [B]', size)            
             simpleSend(conn, msg_to_be_send)
         elif msg['type'] == MESSAGE_TYPE.STEP3:
+            start = time.time()
             msg_to_be_send = self.step3(msg)
+            self.loggingResult('step3 time [s]', time.time() - start)
+            self.loggingResult('MESSAGE_TYPE.STEP3 size [B]', size)            
             simpleSend(conn, msg_to_be_send)
         elif msg['type'] == MESSAGE_TYPE.OK:
-            print('OK')
+            print('proof is OK')
             is_end = True
         elif msg['type'] == MESSAGE_TYPE.NG:
-            print('NG')
+            print('proof is NG')
             is_end = True
         else:
             assert False, "Invalid message type"
         return is_end
+
+    def loggingResult(self, k, v):
+        self.result[k] = v
 
 
 def runClient(categories, epsilon, secret_input, width, mech):
@@ -218,7 +226,7 @@ def runClient(categories, epsilon, secret_input, width, mech):
             if prover.messageHandler(s):
                 break
         s.close()
-        print('close')
+    pprintResult(prover.result)
 
 
 if __name__ == '__main__':

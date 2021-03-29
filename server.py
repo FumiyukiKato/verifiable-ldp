@@ -9,7 +9,7 @@ import Crypto.Random as Random
 from Crypto.Hash import SHA256
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import buildParams, decideRatio, MESSAGE_TYPE
+from util import buildParams, decideRatio, MESSAGE_TYPE, pprintResult
 
 parser = argparse.ArgumentParser(description='Execute output-secure LDP protocols in Server role.')
 parser.add_argument('--mech', type=str, help="used mechanism [krr, oue, olh] (default: krr)", default="krr")
@@ -23,9 +23,10 @@ args = parser.parse_args()
 class Verifier:
     def __init__(self, categories, d, l, n, z):
         self.categories, self.d, self.l, self.n, self.z = categories, d, l, n, z
+        self.clock = time.time()
+        self.result = {}
     
     def setup(self, security):
-        print('Verifier setup')
         q = number.getPrime(2 * security, Random.new().read)        
         g = number.getRandomRange(1, q-1)
         h = number.getRandomRange(1, q-1)
@@ -56,7 +57,6 @@ class Verifier:
         return msg
         
     def step2(self, msg):
-        print('step2')
         w_array, self.y_array = msg['w_array'], msg['y_array']
         self.b_array = msg['b_array']
         self.b_lin = msg['b_lin']
@@ -70,7 +70,6 @@ class Verifier:
         return msg
 
     def step4(self, msg):
-        print('step4')
         c_array, s_array = msg['c_array'], msg['s_array']
         p1_result = self.P1_d(c_array, s_array, self.b_array, self.y_array)
         c_lin, s_lin = msg['c_lin'], msg['s_lin']
@@ -137,40 +136,52 @@ class Verifier:
     
     def messageHandler(self, conn, **kwargs):
         is_end = False
-        msg = simpleRecv(conn)
+        msg, size = simpleRecv(conn)
         if msg == None:
             is_end = True
         elif msg['type'] == MESSAGE_TYPE.START:
+            start = time.time()
             msg_to_be_send = self.setup(security=80)
+            self.loggingResult('setup time [s]', time.time() - start)
+            self.loggingResult('MESSAGE_TYPE.START size [B]', size)
             simpleSend(conn, msg_to_be_send)
         elif msg['type'] == MESSAGE_TYPE.STEP2:
+            start = time.time()
             msg_to_be_send = self.step2(msg)
+            self.loggingResult('step2 time [s]', time.time() - start)
+            self.loggingResult('MESSAGE_TYPE.STEP2 size [B]', size)
             simpleSend(conn, msg_to_be_send)
         elif msg['type'] == MESSAGE_TYPE.STEP4:
+            start = time.time()
             msg_to_be_send = self.step4(msg)
+            self.loggingResult('step4 time [s]', time.time() - start)
+            self.loggingResult('MESSAGE_TYPE.STEP4 size [B]', size)
             simpleSend(conn, msg_to_be_send)
         else:
             assert False, "Invalid message type"
         return is_end
-
+    
+    def loggingResult(self, k, v):
+        self.result[k] = v
 
 def runServer(categories, epsilon, width, mech):
     d, l, n, z = buildParams(epsilon, width, categories)
-
-    verifier = Verifier(categories, d, l, n, z)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((args.address, args.port))
         s.listen(1)
         print('listen at', args.address + ':' + str(args.port))
         while True:
-            print('start accept...')
+            print('Start accept...')
             conn, addr = s.accept()
             with conn:
+                verifier = Verifier(categories, d, l, n, z)
                 while True:
                     if verifier.messageHandler(conn):
                         break
-            print('discard connection.')
+                verifier.loggingResult('overall time', time.time() - verifier.clock)
+                pprintResult(verifier.result)
+            print('Discard connection.')
 
 
 if __name__ == '__main__':

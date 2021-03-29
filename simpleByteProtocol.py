@@ -14,7 +14,7 @@ def simpleRecv(conn):
     full_data += conn.recv(BUF_SIZE)
     if len(full_data) == 0:
         print("Lost connection")
-        return None
+        return None, 0
 
     size_bytes = full_data[:SIZE_BYTE]
     size = bytesToSize(size_bytes)
@@ -25,11 +25,11 @@ def simpleRecv(conn):
             data = conn.recv(BUF_SIZE)
             if len(data) == 0:
                 print("Lost connection")
-                return None
+                return None, 0
             full_data += data
 
     msg = pickle.loads(full_data[SIZE_BYTE:])
-    return msg
+    return msg, size
 
 def simpleSend(conn, msg):
     bytes_msg = pickle.dumps(msg)

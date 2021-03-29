@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from enum import Enum
+from prettytable import PrettyTable
 
 class MESSAGE_TYPE(Enum):
     START = 1
@@ -30,3 +31,9 @@ def decideRatio(eps, d, width):
             return integer // g, width // g
         integer -= 1
     assert False, "Not found"
+
+def pprintResult(result):
+    tab = PrettyTable()
+    for k, v in result.items():
+        tab.add_column(k, [v])
+    print(tab)
