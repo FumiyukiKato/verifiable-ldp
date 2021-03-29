@@ -10,6 +10,7 @@ $ python server.py --mech krr --cate_num 10 --width 100 --epsilon 3.0 --port 500
 $ python client.py --mech krr --cate_num 10 --width 100 --epsilon 3.0 --port 50006 --address 127.0.0.1 --sensitive_value 2
 ```
 
+### usage
 `python server.py`
 ```
 usage: server.py [-h] [--mech MECH] [--cate_num CATE_NUM] [--width WIDTH] [--epsilon EPSILON] [--port PORT] [--address ADDRESS] [--g G]
@@ -41,7 +42,6 @@ optional arguments:
   --epsilon EPSILON     privacy budget used in LDP protocol (default: 1.0)
   --port PORT           bind port (default: 50007)
   --address ADDRESS     bind address (default: 127.0.0.1)
-  --sensitive_value SENSITIVE_VALUE
-                        sensitive value (default: 0)
+  --sensitive_value SENSITIVE_VALUE sensitive value (default: 0)
   --g G                 output space size (g < cate_num) when mech=olh (default: 5)
   ```
