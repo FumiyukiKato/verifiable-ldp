@@ -2,6 +2,12 @@
 
 Python 3.9.1
 
+When using pyenv
+```
+$ pyenv virtualenv 3.9.1 vldp
+$ (vldp) pip install -r requirements.txt
+```
+
 ### example
 ```bash
 $ python server.py --mech krr --cate_num 10 --width 100 --epsilon 3.0 --port 50006 --address 127.0.0.1 
