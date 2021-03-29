@@ -14,6 +14,7 @@ class MESSAGE_TYPE(Enum):
 
 def pprintResult(result):
     tab = PrettyTable()
+    tab.field_names = ["name", "value"]
     for k, v in result.items():
-        tab.add_column(k, [v])
+        tab.add_row([k, v])
     print(tab)

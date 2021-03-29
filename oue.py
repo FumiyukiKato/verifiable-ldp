@@ -3,15 +3,16 @@ import Crypto.Random as Random
 import numpy as np
 import math
 import time
+import pickle
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import MESSAGE_TYPE
+from util import MESSAGE_TYPE, pprintResult
 
 def buildOueParams(epsilon, width, categories):
     d = len(categories)
     l = decideRatio(epsilon, d, width)
     n = width
-    print("n:", n, "l:", l, "d:", d)
+    # print("n:", n, "l:", l, "d:", d)
     return d, l, n
 
 def decideRatio(eps, d, width):
@@ -21,8 +22,8 @@ def decideRatio(eps, d, width):
     if width % 2 != 0:
         assert False, "width must be even"
     ratio = 1 / (1 + np.exp(eps))
-    print('original q=', ratio)
-    print('approximate q=', math.ceil(ratio * width)/100)
+    # print('original q=', ratio)
+    # print('approximate q=', math.ceil(ratio * width)/100)
     return int(ratio * width)
 
 class OueVerifier:
@@ -449,3 +450,62 @@ class OueProver:
 
     def loggingResult(self, k, v):
         self.result[k] = v
+
+
+def runOnMemory(categories, epsilon, secret_input, width):
+    d, l, n = buildOueParams(epsilon, width, categories)
+    z = 0
+
+    verifier = OueVerifier(categories, d, l, n, z)
+    prover = OueProver(secret_input, categories, d, l, n, z)
+    prover.setup()
+
+    # Verifier
+    start = time.time()
+    msg = verifier.setup(security=80)
+    verifier.loggingResult('setup time [s]', time.time() - start)
+    size = len(pickle.dumps(msg))
+    verifier.loggingResult('MESSAGE_TYPE.START size [B]', size)
+
+    # Prover
+    start = time.time()
+    prover.setPubKey(msg['pub_key'])
+    msg = prover.step1(msg)
+    prover.loggingResult('step1 time [s]', time.time() - start)
+    size = len(pickle.dumps(msg))
+    prover.loggingResult('MESSAGE_TYPE.STEP1 size [B]', size)
+
+    # Verifier
+    start = time.time()
+    msg = verifier.step2(msg)
+    verifier.loggingResult('step2 time [s]', time.time() - start)
+    size = len(pickle.dumps(msg))
+    verifier.loggingResult('MESSAGE_TYPE.STEP2 size [B]', size)
+
+    # Prover
+    start = time.time()
+    msg = prover.step3(msg)
+    prover.loggingResult('step3 time [s]', time.time() - start)
+    size = len(pickle.dumps(msg))
+    prover.loggingResult('MESSAGE_TYPE.STEP3 size [B]', size)
+ 
+    # Verifier
+    start = time.time()
+    msg = verifier.step4(msg)
+    verifier.loggingResult('step4 time [s]', time.time() - start)
+    size = len(pickle.dumps(msg))
+    verifier.loggingResult('MESSAGE_TYPE.STEP4 size [B]', size)
+    verifier.loggingResult('overall time', time.time() - verifier.clock)
+    
+    print(msg)
+    pprintResult(verifier.result)
+    pprintResult(prover.result)
+
+
+if __name__ == '__main__':
+    cate_num = 10
+    categories = list(range(0, cate_num))
+    epsilon = 1.0
+    secret_input = 2
+    width = 100
+    runOnMemory(categories, epsilon, secret_input, width)
