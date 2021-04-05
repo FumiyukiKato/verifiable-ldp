@@ -80,8 +80,10 @@ class OueVerifier:
         p1_result = self.P1_d(vec_c_array, vec_s_array, self.vec_b_array, self.vec_y_array)
         vec_c_lin, vec_s_lin = msg['vec_c_lin'], msg['vec_s_lin']
         p2_result = self.P2_d(vec_c_lin, vec_s_lin, self.vec_b_lin, self.vec_y_array)
+        v_s = msg['v_s']
+        p3_result = self.p3_b(self.vec_y_array, v_s)
 
-        if p1_result and p2_result:
+        if p1_result and p2_result and p3_result:
             msg = {'type': MESSAGE_TYPE.OK}
         else:
             msg = {'type': MESSAGE_TYPE.NG}
@@ -117,10 +119,10 @@ class OueVerifier:
             for s,c,b,y,x in zip(s_array, c_array, b_array, y_array, ak_p1_x_array):
                 for i in [0, 1]:
                     if pow(self.h, s[i], self.q) != b[i] * pow(y * pow(pow(self.g, i, self.q), -1, self.q) % self.q, c[i], self.q) % self.q:
-                        print("False1.")
+                        print("NG.")
                         return False
                 if x != sum(c):
-                    print("False2.")
+                    print("NG.")
                     return False
         print("OK.")
         return True 
@@ -141,11 +143,24 @@ class OueVerifier:
                 commitment = commitment * y % self.q
             for c, s, b, summation in zip(c_lin, s_lin, b_lin, [self.n // 2, self.l]):
                 if pow(self.h, s, self.q) != b * pow(commitment * pow(pow(self.g, summation, self.q), -1, self.q) % self.q, c, self.q) % self.q:
-                    print("False1.")
+                    print("NG.")
                     return False
             if ak_p2_x_lin != sum(c_lin):
-                print("False2.")
+                print("NG.")
                 return False
+        print("OK.")
+        return True
+    
+    def p3_b(self, vec_y_array, v_s):
+        print("####### P3 verification #######")
+        prd_y = 1
+        for y_array in vec_y_array:
+            for y in y_array:
+                prd_y = prd_y * y % self.q
+        if prd_y != (pow(self.g, self.n//2 + (self.d-1)*self.l, self.q) * pow(self.h, v_s, self.q) % self.q):
+            print("NG.")
+            return False
+        
         print("OK.")
         return True
     
@@ -224,12 +239,14 @@ class OueProver:
         vec_c_array, vec_s_array = self.P1_c(vec_ak_p1_x_array)
         vec_ak_p2_x_lin = msg['vec_ak_p2_x_lin']
         vec_c_lin, vec_s_lin = self.P2_c(vec_ak_p2_x_lin)
+        v_s = self.p3_a()
 
         msg = {'type': MESSAGE_TYPE.STEP4}
         msg['vec_c_array'] = vec_c_array
         msg['vec_s_array'] = vec_s_array
         msg['vec_c_lin'] = vec_c_lin
         msg['vec_s_lin'] = vec_s_lin
+        msg['v_s'] = v_s
         return msg        
         
     def encryption(self, g_a_array, g_b_array, g_ab_array):
@@ -421,6 +438,12 @@ class OueProver:
                 vec_s_lin.append((s_lin, v_sum * (ak_p2_x_lin - c_lin) + random_w_lin))
 
         return vec_c_lin, vec_s_lin
+
+    def p3_a(self):
+        v_s = 0
+        for v_array in self.vec_v_array:
+            v_s += sum(v_array)
+        return v_s
 
     def messageHandler(self, conn):
         is_end = False
