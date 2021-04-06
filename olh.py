@@ -7,7 +7,7 @@ import time
 import pickle
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import MESSAGE_TYPE, pprintResult
+from util import MESSAGE_TYPE, pprintResult, saveJsonResult
 
 class Hasher():
     def __init__(self, seed, d):
@@ -444,9 +444,10 @@ def runOnMemory(categories, epsilon, secret_input, width, g):
     verifier.loggingResult('MESSAGE_TYPE.STEP4 size [B]', size)
     verifier.loggingResult('overall time', time.time() - verifier.clock)
 
-    print(msg)
     pprintResult(verifier.result)
     pprintResult(prover.result)
+
+    return msg, verifier.result, prover.result
 
 
 if __name__ == '__main__':
@@ -456,4 +457,7 @@ if __name__ == '__main__':
     secret_input = 2
     width = 100
     g = 5
-    runOnMemory(categories, epsilon, secret_input, width, g)
+    msg, verifier_result, prover_result = runOnMemory(categories, epsilon, secret_input, width, g)
+    saveJsonResult(verifier_result, dir_name='result', params=['onmemory', 'verifier', cate_num, epsilon, width, g, 'olh'])
+    saveJsonResult(prover_result, dir_name='result', params=['onmemory', 'prover', cate_num, epsilon, secret_input, width, g, 'olh'])
+    print(msg)

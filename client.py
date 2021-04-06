@@ -3,7 +3,7 @@ import socket
 import time
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import MESSAGE_TYPE, pprintResult
+from util import MESSAGE_TYPE, pprintResult, saveJsonResult
 from krr import KrrProver, buildKrrParams
 from oue import OueProver, buildOueParams
 from olh import OlhProver, buildOlhParams
@@ -33,6 +33,7 @@ def runClient(categories, epsilon, secret_input, width, Prover, d, l, n, z):
                 break
         s.close()
     pprintResult(prover.result)
+    return prover.result
 
 
 if __name__ == '__main__':
@@ -54,4 +55,9 @@ if __name__ == '__main__':
     else:
         assert False, "Invalid parameter mech"
 
-    runClient(categories, epsilon, secret_input, width, Prover, d, l, n, z)
+    result = runClient(categories, epsilon, secret_input, width, Prover, d, l, n, z)
+    params = ['prover', args.cate_num, epsilon, secret_input, width, mech]
+    if mech == "olh":
+        params = ['prover', args.cate_num, epsilon, secret_input, width, args.g, mech]
+
+    saveJsonResult(result, dir_name='result', params=params)

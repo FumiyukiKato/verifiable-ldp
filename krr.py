@@ -6,7 +6,7 @@ import time
 import pickle
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import MESSAGE_TYPE, pprintResult
+from util import MESSAGE_TYPE, pprintResult, saveJsonResult
 
 def buildKrrParams(epsilon, width, categories):
     d = len(categories)
@@ -408,9 +408,10 @@ def runOnMemory(categories, epsilon, secret_input, width):
     verifier.loggingResult('MESSAGE_TYPE.STEP4 size [B]', size)
     verifier.loggingResult('overall time', time.time() - verifier.clock)
 
-    print(msg)
     pprintResult(verifier.result)
     pprintResult(prover.result)
+
+    return msg, verifier.result, prover.result 
 
 
 if __name__ == '__main__':
@@ -419,4 +420,7 @@ if __name__ == '__main__':
     epsilon = 1.0
     secret_input = 2
     width = 100
-    runOnMemory(categories, epsilon, secret_input, width)
+    msg, verifier_result, prover_result = runOnMemory(categories, epsilon, secret_input, width)
+    saveJsonResult(verifier_result, dir_name='result', params=['onmemory', 'verifier', cate_num, epsilon, width, 'krr'])
+    saveJsonResult(prover_result, dir_name='result', params=['onmemory', 'prover', cate_num, epsilon, secret_input, width, 'krr'])
+    print(msg)

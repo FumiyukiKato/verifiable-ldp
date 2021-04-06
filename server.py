@@ -3,7 +3,7 @@ import socket
 import time
 
 from simpleByteProtocol import simpleRecv, simpleSend
-from util import pprintResult
+from util import pprintResult, saveJsonResult
 from krr import KrrVerifier, buildKrrParams
 from oue import OueVerifier, buildOueParams
 from olh import OlhVerifier, buildOlhParams
@@ -33,7 +33,8 @@ def runServer(categories, epsilon, width, Verifier, d, l, n, z):
                         break
                 verifier.loggingResult('overall time', time.time() - verifier.clock)
                 pprintResult(verifier.result)
-            print('Discard connection.')
+            print('Finish protocol.')
+            return verifier.result
 
 
 if __name__ == '__main__':
@@ -54,4 +55,9 @@ if __name__ == '__main__':
     else:
         assert False, "Invalid parameter mech"
 
-    runServer(categories, epsilon, width, Verifier, d, l, n, z)
+    result = runServer(categories, epsilon, width, Verifier, d, l, n, z)
+    params = ['verifier', args.cate_num, epsilon, width, mech]
+    if mech == "olh":
+        params = ['verifier', args.cate_num, epsilon, width, args.g, mech]
+
+    saveJsonResult(result, dir_name='result', params=params)

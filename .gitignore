@@ -55,5 +55,8 @@ geckodriver.log
 # copied changelog
 docs/source/changelog.md
 
+# images
+notebook/*png
 
-*png
+# result
+result/
