@@ -527,11 +527,20 @@ def runOnMemory(categories, epsilon, secret_input, width):
 
 
 if __name__ == '__main__':
-    cate_num = 10
+    import argparse
+    parser = argparse.ArgumentParser(description='Execute OLH on memory.')
+    parser.add_argument('--cate_num', type=int, help="number of cateogories (default: 5)", default=5)
+    parser.add_argument('--width', type=int, help="distribution accuracy parameter (default: 100)", default=100)
+    parser.add_argument('--epsilon', type=float, help="privacy budget used in LDP protocol (default: 1.0)", default=1.0)
+    parser.add_argument('--sensitive_value', type=int, help="sensitive value (default: 0)", default=0)
+    args = parser.parse_args()
+
+    cate_num = args.cate_num
     categories = list(range(0, cate_num))
-    epsilon = 1.0
-    secret_input = 2
-    width = 100
+    epsilon = args.epsilon
+    secret_input = args.sensitive_value
+    width = args.width
+
     msg, verifier_result, prover_result = runOnMemory(categories, epsilon, secret_input, width)
     saveJsonResult(verifier_result, dir_name='result', params=['onmemory', 'verifier', cate_num, epsilon, width, 'oue'])
     saveJsonResult(prover_result, dir_name='result', params=['onmemory', 'prover', cate_num, epsilon, secret_input, width, 'oue'])
