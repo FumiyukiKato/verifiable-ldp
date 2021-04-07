@@ -26,12 +26,14 @@ def runClient(categories, epsilon, secret_input, width, Prover, d, l, n, z):
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((args.address, args.port))
+        prover.clock = time.time()
         start_msg = {'type': MESSAGE_TYPE.START}
         simpleSend(s, start_msg)
         while True:
             if prover.messageHandler(s):
                 break
         s.close()
+    prover.loggingResult('overall time', time.time() - prover.clock)
     pprintResult(prover.result)
     return prover.result
 
