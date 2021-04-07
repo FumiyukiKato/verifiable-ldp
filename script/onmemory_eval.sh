@@ -1,6 +1,6 @@
 #! /bin/bash -x
 
-# script/onmemory_eval.sh 100 10 1.0 10
+# script/onmemory_eval.sh 100 10 1.0 10 10
 width=$1
 cate_num=$2
 epsilon=$3

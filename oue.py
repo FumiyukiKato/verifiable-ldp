@@ -24,7 +24,7 @@ def decideRatio(eps, d, width):
     ratio = 1 / (1 + np.exp(eps))
     # print('original q=', ratio)
     # print('approximate q=', math.ceil(ratio * width)/100)
-    return int(ratio * width)
+    return math.ceil(ratio * width)
 
 class OueVerifier:
     def __init__(self, categories, d, l, n, z):
