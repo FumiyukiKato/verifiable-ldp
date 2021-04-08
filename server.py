@@ -7,6 +7,7 @@ from util import pprintResult, saveJsonResult
 from krr import KrrVerifier, buildKrrParams
 from oue import OueVerifier, buildOueParams
 from olh import OlhVerifier, buildOlhParams
+from normal import NormalVerifier
 
 parser = argparse.ArgumentParser(description='Execute output-secure LDP protocols in Server role.')
 parser.add_argument('--mech', type=str, help="used mechanism [krr, oue, olh] (default: krr)", default="krr")
@@ -52,9 +53,12 @@ if __name__ == '__main__':
     elif mech == "olh":
         Verifier = OlhVerifier
         d, l, n, z = buildOlhParams(epsilon, width, args.g)
+    elif mech == 'normal':
+        Verifier = NormalVerifier
+        d, l, n, z = 0, 0, 0, 0
     else:
         assert False, "Invalid parameter mech"
-
+    
     result = runServer(categories, epsilon, width, Verifier, d, l, n, z)
     params = ['verifier', args.cate_num, epsilon, width, mech]
     if mech == "olh":
