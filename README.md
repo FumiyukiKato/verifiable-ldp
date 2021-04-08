@@ -14,9 +14,11 @@ $ (vldp) pip install -r requirements.txt
 ```
 
 ### example
+- wake up server
 ```bash
 $ python server.py --mech krr --cate_num 10 --width 100 --epsilon 3.0 --port 50006 --address 127.0.0.1 
 ```
+- request from client
 ```bash
 $ python client.py --mech krr --cate_num 10 --width 100 --epsilon 3.0 --port 50006 --address 127.0.0.1 --sensitive_value 2
 ```
