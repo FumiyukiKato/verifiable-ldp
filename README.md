@@ -59,5 +59,5 @@ optional arguments:
 
 ### reproduce all experiment
 ```
-script/eval.sh 50006 127.0.0.1 32 1.0 10
+$ script/eval.sh 50006 127.0.0.1 32 1.0 10
 ```
