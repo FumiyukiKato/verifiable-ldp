@@ -56,3 +56,8 @@ optional arguments:
   --sensitive_value SENSITIVE_VALUE sensitive value (default: 0)
   --g G                 output space size (g < cate_num) when mech=olh (default: 5)
   ```
+
+### reproduce all experiment
+```
+$ script/eval.sh 50006 127.0.0.1 32 1.0 10
+```
