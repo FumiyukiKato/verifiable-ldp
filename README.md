@@ -1,7 +1,12 @@
 # verifiable-ldp
 
-Python 3.9.1
+This is an implementation of our paper:  
+**Preventing Output-Manipulation in Local Differential Privacy using Verifiable Randomization Mechanism**
 
+
+
+### dependencies
+Python version is 3.9.1.  
 When using pyenv
 ```
 $ pyenv virtualenv 3.9.1 vldp
