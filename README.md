@@ -1,6 +1,7 @@
 # Preventing Manipulation Attack in Local Differential Privacy using Verifiable Randomization Mechanism
 
 https://arxiv.org/abs/2104.06569
+(DBSec '21)
 
 Local differential privacy (LDP) has been received increasing attention as a formal privacy definition without a trusted server. In a typical LDP protocol, the clients perturb their data locally with a randomized mechanism before sending it to the server for analysis. Many studies in the literature of LDP implicitly assume that the clients honestly follow the protocol; however, two recent studies show that LDP is generally vulnerable under malicious clients. Cao et al. (USENIX Security ’21) and Cheu et al. (IEEE S&P ’21) demonstrated that the malicious clients can effectively skew the analysis (such as frequency estimation) by sending fake data to the server, which is called data poisoning attack or manipulation attack against LDP. In this paper, we propose secure and efficient verifiable LDP protocols to prevent manipulation attacks. Specifically, we leverage Cryptographic Randomized Response Technique (CRRT) as a building block to convert existing LDP mechanisms into a verifiable version. In this way, the server can verify the completeness of executing an agreed randomization mechanism on the client side without sacrificing local privacy. Our proposed method can completely protect the LDP protocol from output manipulation attacks, and significantly mitigates the unexpected damage from malicious clients with acceptable computational overhead.
 
